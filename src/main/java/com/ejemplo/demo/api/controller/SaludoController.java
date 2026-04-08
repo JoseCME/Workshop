@@ -37,7 +37,7 @@ public class SaludoController {
     
     @GetMapping("/saludos")
     public ResponseEntity<SaludoResponse> saludar(
-            @RequestParam(defaultValue = "Mundo") String nombre
+            @RequestParam(defaultValue = "Desconocido") String nombre
     ) {
         return ResponseEntity.ok(saludoService.crearSaludo(nombre));
     }
