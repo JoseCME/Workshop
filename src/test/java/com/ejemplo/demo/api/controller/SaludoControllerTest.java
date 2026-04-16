@@ -1,10 +1,7 @@
 package com.ejemplo.demo.api.controller;
 
-
-import com.ejemplo.demo.api.dto.SaludoRequest;
 import com.ejemplo.demo.api.dto.SaludoResponse;
 import com.ejemplo.demo.domain.service.SaludoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +19,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-
 @WebMvcTest(SaludoController.class)
 class SaludoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    
 
     @MockBean
     private SaludoService saludoService;
-
 
     @Test
     @DisplayName("Debe responder health del workshop")
@@ -43,42 +36,35 @@ class SaludoControllerTest {
                 .andExpect(jsonPath("$.estado").value("ok"));
     }
 
-    @Test 
-    @DisplayName("GET /api/v1/saludos?nombre=Ana -> 200 y mensaje correcto")
-    void debeRetornarSaludoConNombreValido() throws Exception {
-        // Arrange
-        String mensajeEsperado = "Hola, Estudiante Ana. Bienvenido a Spring Boot 3!";
-        when(saludoService.crearSaludo("Ana"))
-                .thenReturn(new SaludoResponse(mensajeEsperado, Instant.now()));
-
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/saludos")
-                        .param("nombre", "Ana"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.mensaje").value(mensajeEsperado));
-    }
-    
     @Test
-    @DisplayName("POST /api/v1/saludos con nombre vacío debe retornar 400 y codigo VALIDATION_ERROR")
-    void debeRetornar400ConNombreVacio() throws Exception {
-        // Arrange
-        String requestBody = "{\"nombre\":\"\"}";
+    @DisplayName("Debe responder saludo por GET")
+    void debeResponderSaludoPorGet() throws Exception {
+        when(saludoService.crearSaludo(anyString()))
+                .thenReturn(new SaludoResponse("Hola, Ana. Bienvenido a Spring Boot 3!", Instant.now()));
 
-        // Act & Assert
+        mockMvc.perform(get("/api/v1/saludos").param("nombre", "Ana"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensaje").value("Hola, Ana. Bienvenido a Spring Boot 3!"));
+    }
+
+    @Test
+    @DisplayName("Debe validar nombre obligatorio por POST")
+    void debeValidarNombreObligatorioPorPost() throws Exception {
         mockMvc.perform(post("/api/v1/saludos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                        .content("{\"nombre\":\"\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.codigo").value("VALIDATION_ERROR"));
     }
 
-    
-    
-    /*
-    PASO 6 (EJERCICIO):
-    Cuando habilites los endpoints de /api/v1/saludos, crea estas pruebas:
+    @Test
+    @DisplayName("Debe responder error de negocio al contener numeros")
+    void debeResponderErrorDeNegocio() throws Exception {
+        when(saludoService.crearSaludo("Ana1"))
+                .thenThrow(new IllegalArgumentException("El nombre no puede contener numeros"));
 
-    1) GET /api/v1/saludos?nombre=Ana -> 200 y mensaje correcto
-    2) POST /api/v1/saludos con {"nombre":""} -> 400 y codigo VALIDATION_ERROR
-    */
+        mockMvc.perform(get("/api/v1/saludos").param("nombre", "Ana1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.codigo").value("BUSINESS_RULE_ERROR"));
+    }
 }

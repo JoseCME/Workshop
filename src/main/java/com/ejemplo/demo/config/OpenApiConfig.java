@@ -10,17 +10,15 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI customOpenAPI() {
+    public OpenAPI openAPI() {
+        // SOLUCION RETO (paso 7): metadata de Swagger/OpenAPI para documentar la API.
         return new OpenAPI()
-            .info(new Info()
-                .title("Workshop Spring Boot API")
-                .version("1.0.0")
-                .description("API de saludos construida " +
-                              "durante el workshop de Spring Boot 3")
-                .contact(new Contact()
-                    .name("Jose Carlos")
-                    .email("jmorataye1@miumg.edu.gt")
-                    .url("https://github.com/JoseCME/Workshop"))
-            );
+                .info(new Info()
+                        .title("Spring Boot API Demo Progra 3")
+                        .version("v1.0.0")
+                        .description("API de referencia para taller Spring Boot")
+                        .contact(new Contact()
+                                .name("Progra 3")
+                                .email("docente@umg.edu.gt")));
     }
 }
