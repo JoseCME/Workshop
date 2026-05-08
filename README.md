@@ -221,6 +221,62 @@ Donde:
 - `r` = tasa mensual (`tasaAnual / 12 / 100`)
 - `n` = numero de meses
 
+### Paso 9 - Contract-first: OpenAPI en YAML + OpenAPI Generator *(desafio)*
+
+Objetivo: adoptar enfoque **contract-first**: definir la API en un archivo OpenAPI (YAML), generar desde Maven las **interfaces** Spring que describen cada endpoint, y hacer que sus `@RestController` **implementen** esas interfaces. **No deben cambiar** las rutas ni la forma del JSON que ya probamos en pasos anteriores (los `curl` y `mvn test` deben seguir comportandose igual).
+
+#### 9.1 Inventario: todo debe estar en el YAML
+
+Cada operacion existente en el codigo tiene que aparecer en el contrato. Referencia de **tags** (sirven para agrupar; con `useTags` el generador suele crear **una interfaz Java por tag**), metodo, ruta y notas:
+
+| Tag sugerido | Metodo HTTP | Ruta actual | Notas |
+| :--- | :--- | :--- | :--- |
+| `workshop` | GET | `/api/v1` | Objeto con `estado` y `mensaje`. |
+| `workshop` | GET | `/api/v1/saludos` | Query `nombre`, valor por defecto `Mundo`. |
+| `workshop` | POST | `/api/v1/saludos` | Cuerpo/respuesta alineados con `SaludoRequest` / `SaludoResponse`. |
+| `simulaciones` | POST | `/api/v1/simulaciones/prestamo` | `PrestamoRequest` / `PrestamoResponse`. |
+| `demo-estado` | POST | `/api/v1/demo/estado/singleton/{valor}` | Respuesta `{ tipo, valorActual }`. |
+| `demo-estado` | GET | `/api/v1/demo/estado/singleton` | Idem. |
+| `demo-estado` | POST | `/api/v1/demo/estado/singleton/reset` | Idem. |
+| `demo-estado` | POST | `/api/v1/demo/estado/manual/{valor}` | Idem. |
+| `demo-estado` | GET | `/api/v1/demo/estado/manual` | Idem. |
+
+En cada operacion definan un **`operationId`** claro (sera el nombre del metodo en la interfaz generada). Ejemplos: `getWorkshopHealth`, `saludarPorGet`, `saludarPorPost`, `simularPrestamo`; para la demo de estado, nombres explicitos como `actualizarSingleton`, `obtenerSingleton`, `reiniciarSingleton`, `actualizarManual`, `obtenerManual`.
+
+Ubicacion recomendada del archivo: `src/main/resources/openapi/openapi.yaml`.
+
+#### 9.2 Que deben hacer (orden sugerido)
+
+1. **Escribir el contrato**  
+   Completar `openapi.yaml` con `paths`, `components.schemas`, tags y `operationId` de forma que refleje **exactamente** las rutas y los cuerpos/respuestas actuales (tipos, query params, path params).
+
+2. **Configurar Maven**  
+   - Agregar el plugin `openapi-generator-maven-plugin` (generator `spring`) ejecutado en fase `generate-sources`.  
+   - Opciones utiles: `interfaceOnly`, `useTags`, `useSpringBoot3`, `useJakartaEe`, validacion de beans si aplica.  
+   - Para **no** generar modelos duplicados encima de los records/DTO que ya tienen en `com.ejemplo.demo.api.dto`, investiguen `importMappings` y `generateModels=false` (buena practica cuando el modelo Java ya existe).  
+   - Registrar la carpeta de fuentes generadas (por ejemplo con `build-helper-maven-plugin` y `add-source`) para que compile en IDE y CI.
+
+3. **Refactorizar controladores**  
+   Tras `mvn generate-sources`, localicen las interfaces generadas (por ejemplo `WorkshopApi`, `SimulacionesApi`, y una tercera para `demo-estado`). Hagan que cada `@RestController` **implemente** la interfaz que le corresponda, muevan la logica a los metodos `@Override` y eliminen anotaciones duplicadas si Spring ya las hereda de la interfaz (comprueben con una prueba). **Mantengan** inyeccion de servicios y reglas de negocio igual que antes.
+
+4. **Congelar el contrato publico**  
+   Si `mvn test` falla, lo mas probable es que el YAML no coincida con lo que esperan los tests (nombres de campos JSON, rutas, metodos). Ajusten el contrato o el mapeo hasta que todo pase; no cambien los tests salvo que el docente lo autorice.
+
+5. **Documentacion y buenas practicas (lectura)**  
+   Revisen la guia del generator `spring` en [OpenAPI Generator](https://openapi-generator.tech/docs/generation/) y, si quieren contexto de diseno, [Contract-first con OpenAPI](https://swagger.io/blog/api-design/openapi-driven-contract-first-development/). Idea clave: el YAML es la fuente de verdad; los cambios de API conscientes empiezan ahi.
+
+Comando util durante el trabajo:
+
+```bash
+mvn generate-sources
+```
+
+Verificar al final:
+
+```bash
+mvn test
+```
+
 ---
 
 ## Demo adicional: Singleton vs no singleton
@@ -260,6 +316,8 @@ La consulta devuelve `0`, porque cada endpoint crea una instancia nueva.
 - [ ] Endpoint nuevo implementado
 - [ ] Tests del endpoint nuevo en verde
 - [ ] Pruebas pasando (`mvn test`)
+- [ ] (Paso 9) YAML contract-first completo; interfaces generadas desde `pom.xml`
+- [ ] (Paso 9) Controladores implementan interfaces; rutas y JSON sin regresiones
 
 ---
 
