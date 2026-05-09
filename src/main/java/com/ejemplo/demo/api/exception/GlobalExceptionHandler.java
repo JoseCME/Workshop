@@ -1,13 +1,13 @@
 package com.ejemplo.demo.api.exception;
 
 import com.ejemplo.demo.api.dto.ErrorResponse;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,20 +21,17 @@ public class GlobalExceptionHandler {
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             detalles.put(error.getField(), error.getDefaultMessage());
         }
-
         ErrorResponse body = new ErrorResponse(
                 "VALIDATION_ERROR",
                 "Uno o mas campos son invalidos",
                 Instant.now(),
                 detalles
         );
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> manejarReglaDeNegocio(IllegalArgumentException ex) {
-        // SOLUCION RETO (paso 5): errores de regla de negocio regresan 400 controlado.
         ErrorResponse body = new ErrorResponse(
                 "BUSINESS_RULE_ERROR",
                 ex.getMessage(),
@@ -42,6 +39,17 @@ public class GlobalExceptionHandler {
                 Map.of()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> manejarNoEncontrado(EntityNotFoundException ex) {
+        ErrorResponse body = new ErrorResponse(
+                "NOT_FOUND",
+                ex.getMessage(),
+                Instant.now(),
+                Map.of()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(Exception.class)

@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: Spring Boot API Demo Progra 3
+  version: 1.0.0
+  description: API de referencia para taller Spring Boot
+  contact:
+    name: Progra 3
+    email: docente@umg.edu.gt
+
+servers:
+  - url: http://localhost:8081
+
+tags:
+  - name: workshop
+  - name: simulaciones
+  - name: demo-estado
+
+paths:
+  /api/v1:
+    get:
+      tags: [workshop]
+      operationId: getWorkshopHealth
+      summary: Health check del taller
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/saludos:
+    get:
+      tags: [workshop]
+      operationId: saludarPorGet
+      summary: Saludo por GET
+      parameters:
+        - name: nombre
+          in: query
+          required: false
+          schema:
+            type: string
+            default: Mundo
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaludoResponse'
+    post:
+      tags: [workshop]
+      operationId: saludarPorPost
+      summary: Saludo por POST
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaludoRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaludoResponse'
+        "400":
+          description: Validacion fallida
+
+  /api/v1/simulaciones/prestamo:
+    post:
+      tags: [simulaciones]
+      operationId: simularPrestamo
+      summary: Simular prestamo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrestamoRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrestamoResponse'
+        "400":
+          description: Datos invalidos
+
+  /api/v1/categorias:
+    get:
+      tags: [workshop]
+      operationId: listarCategorias
+      summary: Listar todas las categorias
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoriaResponse'
+    post:
+      tags: [workshop]
+      operationId: crearCategoria
+      summary: Crear una categoria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaRequest'
+      responses:
+        "201":
+          description: Creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriaResponse'
+        "400":
+          description: Datos invalidos
+
+  /api/v1/categorias/{id}:
+    get:
+      tags: [workshop]
+      operationId: obtenerCategoria
+      summary: Obtener categoria por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriaResponse'
+        "404":
+          description: No encontrada
+    put:
+      tags: [workshop]
+      operationId: actualizarCategoria
+      summary: Actualizar categoria
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriaRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriaResponse'
+        "404":
+          description: No encontrada
+    delete:
+      tags: [workshop]
+      operationId: eliminarCategoria
+      summary: Eliminar categoria
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Eliminada
+        "404":
+          description: No encontrada
+
+  /api/v1/productos:
+    get:
+      tags: [workshop]
+      operationId: listarProductos
+      summary: Listar todos los productos
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductoResponse'
+    post:
+      tags: [workshop]
+      operationId: crearProducto
+      summary: Crear un producto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoRequest'
+      responses:
+        "201":
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoResponse'
+        "400":
+          description: Datos invalidos
+
+  /api/v1/productos/{id}:
+    get:
+      tags: [workshop]
+      operationId: obtenerProducto
+      summary: Obtener producto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoResponse'
+        "404":
+          description: No encontrado
+    put:
+      tags: [workshop]
+      operationId: actualizarProducto
+      summary: Actualizar producto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoResponse'
+        "404":
+          description: No encontrado
+    delete:
+      tags: [workshop]
+      operationId: eliminarProducto
+      summary: Eliminar producto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Eliminado
+        "404":
+          description: No encontrado
+
+  /api/v1/demo/estado/singleton/{valor}:
+    post:
+      tags: [demo-estado]
+      operationId: actualizarSingleton
+      parameters:
+        - name: valor
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/demo/estado/singleton:
+    get:
+      tags: [demo-estado]
+      operationId: obtenerSingleton
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/demo/estado/singleton/reset:
+    post:
+      tags: [demo-estado]
+      operationId: reiniciarSingleton
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/demo/estado/manual/{valor}:
+    post:
+      tags: [demo-estado]
+      operationId: actualizarManual
+      parameters:
+        - name: valor
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/demo/estado/manual:
+    get:
+      tags: [demo-estado]
+      operationId: obtenerManual
+      responses:
+        "200":
+          description: OK
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        estado:
+          type: string
+        mensaje:
+          type: string
+
+    SaludoRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+      required: [nombre]
+
+    SaludoResponse:
+      type: object
+      properties:
+        mensaje:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    PrestamoRequest:
+      type: object
+      properties:
+        monto:
+          type: number
+        tasaAnual:
+          type: number
+        meses:
+          type: integer
+      required: [monto, tasaAnual, meses]
+
+    PrestamoResponse:
+      type: object
+      properties:
+        cuotaMensual:
+          type: number
+        interesTotal:
+          type: number
+        totalPagar:
+          type: number
+
+    CategoriaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        descripcion:
+          type: string
+      required: [nombre]
+
+    CategoriaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+        descripcion:
+          type: string
+
+    ProductoRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        precio:
+          type: number
+        categoriaId:
+          type: integer
+          format: int64
+      required: [nombre, precio, categoriaId]
+
+    ProductoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+        precio:
+          type: number
+        categoriaId:
+          type: integer
+          format: int64
+        categoriaNombre:
+          type: string
